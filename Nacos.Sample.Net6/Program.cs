@@ -1,4 +1,5 @@
 
+using Nacos.AspNetCore.V2;
 using Nacos.V2.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +7,7 @@ var configuration = builder.Configuration;
 
 #region 注册服务到容器 begin
 // nacos服务注册，发现配置
-//builder.Services.AddNacosAspNet(configuration, "NacosConfig");
+builder.Services.AddNacosAspNet(configuration, "NacosConfig");
 // nacos配置中心，方式一：
 builder.Services.AddNacosV2Config(builder.Configuration, sectionName: "NacosConfig");
 // nocas配置中心，方式二：
@@ -19,7 +20,7 @@ builder.Services.AddNacosV2Config(builder.Configuration, sectionName: "NacosConf
 //    x.Password = "nacos";
 
 //    // this sample will add the filter to encrypt the config with AES.
-//    x.ConfigFilterAssemblies = new List<string> { "BaseApi" };
+//    x.ConfigFilterAssemblies = new List<string> { "NacosDemoApi" };
 
 //    // http协议设置false，rpc设置true
 //    x.ConfigUseRpc = false;
