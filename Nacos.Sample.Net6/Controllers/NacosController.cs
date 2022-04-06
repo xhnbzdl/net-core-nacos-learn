@@ -11,7 +11,7 @@ namespace Nacos.Sample.Net6.Controllers
     {
         private readonly INacosConfigService _nacosConfigService;
         private readonly INacosNamingService _nacosNamingService;
-        private static readonly CusConfigListen _configListen = new();
+        private static readonly CusConfigListen ConfigListen = new();
 
         public NacosController(INacosConfigService nacosConfigService,
             INacosNamingService nacosNamingService)
@@ -27,7 +27,7 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpGet]
         public async Task<string> GetSectionAsync(string dataId)
         {
-            var res = await _nacosConfigService.GetConfig(dataId, "nacos_demo", 3000);
+            var res = await _nacosConfigService.GetConfig(dataId, "nacos_demo", 3000).ConfigureAwait(false);
             return res;
         }
         /// <summary>
@@ -35,9 +35,9 @@ namespace Nacos.Sample.Net6.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<string> GetDBConnectionString()
+        public async Task<string> GetDbConnectionString()
         {
-            return await _nacosConfigService.GetConfig("DataBase_ConnectionString", "nacos_demo", 3000);
+            return await _nacosConfigService.GetConfig("DataBase_ConnectionString", "nacos_demo", 3000).ConfigureAwait(false);
         }
         /// <summary>
         /// 发布配置
@@ -49,7 +49,7 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpPost]
         public async Task<bool> SetConfig(string dataId,string group= "nacos_demo", string content="")
         {
-            var res = await _nacosConfigService.PublishConfig(dataId, group , content);
+            var res = await _nacosConfigService.PublishConfig(dataId, group , content).ConfigureAwait(false);
             return res;
         }
         /// <summary>
@@ -60,7 +60,7 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpGet]
         public async Task<string> AddListener(string dataId = "DataBase_ConnectionString")
         {
-            await _nacosConfigService.AddListener(dataId, "nacos_demo", _configListen);
+            await _nacosConfigService.AddListener(dataId, "nacos_demo", ConfigListen).ConfigureAwait(false);
             return "ok";
         }
         /// <summary>
@@ -71,7 +71,7 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpGet]
         public async Task<string> UnListener(string dataId = "DataBase_ConnectionString")
         {
-            await _nacosConfigService.RemoveListener(dataId, "nacos_demo", _configListen);
+            await _nacosConfigService.RemoveListener(dataId, "nacos_demo", ConfigListen).ConfigureAwait(false);
 
             return "ok";
         }
@@ -87,7 +87,7 @@ namespace Nacos.Sample.Net6.Controllers
 
             // 这里需要知道被调用方的服务名
             // 获取服务实例
-            var instance = await _nacosNamingService.SelectOneHealthyInstance("NacosDemoApi", "nacos_demo");
+            var instance = await _nacosNamingService.SelectOneHealthyInstance("NacosDemoApi", "nacos_demo").ConfigureAwait(false);
             var host = $"{instance.Ip}:{instance.Port}";
             var baseUrl = instance.Metadata.TryGetValue("secure", out _) ? $"https://{host}" : $"http://{host}";
 
