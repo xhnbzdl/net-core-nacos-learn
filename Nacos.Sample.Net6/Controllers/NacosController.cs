@@ -9,15 +9,29 @@ namespace Nacos.Sample.Net6.Controllers
     [ApiController]
     public class NacosController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly INacosConfigService _nacosConfigService;
         private readonly INacosNamingService _nacosNamingService;
-        private static readonly CusConfigListen ConfigListen = new();
+        private readonly CusConfigListen ConfigListen;
+        private readonly IOptions<UserInfo> _userInfo0;
+        private readonly IOptionsSnapshot<UserInfo> _userInfo1;
+        private readonly IOptionsMonitor<UserInfo> _userInfo2;
 
         public NacosController(INacosConfigService nacosConfigService,
-            INacosNamingService nacosNamingService)
+            INacosNamingService nacosNamingService,
+            IConfiguration configuration,
+            IOptions<UserInfo> userInfo0,
+            IOptionsSnapshot<UserInfo> userInfo1,
+            IOptionsMonitor<UserInfo> userInfo2,
+            ILogger<NacosController> logger)
         {
             _nacosConfigService = nacosConfigService;
             _nacosNamingService = nacosNamingService;
+            _configuration = configuration;
+            _userInfo0 = userInfo0;
+            _userInfo1 = userInfo1;
+            _userInfo2 = userInfo2;
+            ConfigListen = new(logger);
         }
         /// <summary>
         /// 获取配置
@@ -103,17 +117,51 @@ namespace Nacos.Sample.Net6.Controllers
             return await result.Content.ReadAsStringAsync();
         }
         /// <summary>
+        /// 通过IConfiguration获取与nacos绑定的配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public UserInfo GetBindConfig()
+        {
+            // 绑定了的配置，如果在GUI进行了修改，程序会同步得到修改后的配置
+            return _configuration.GetSection("UserInfo").Get<UserInfo>();
+        }
+        /// <summary>
+        /// 获取通过Services.Configure<UserInfo>的配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public List<UserInfo> GetOptionBindConfig()
+        {
+            return new List<UserInfo> 
+            {
+                // IOptions 值不会同步更新
+                _userInfo0.Value,
+                // IOptionsSnapshot 同步更新
+                _userInfo1.Value,
+                // IOptionsMonitor 同步更新
+                _userInfo2.CurrentValue
+            };
+        }
+        /// <summary>
         /// 自定义监听
         /// </summary>
         public class CusConfigListen : IListener
         {
+            private readonly ILogger _logger;
+
+            public CusConfigListen(ILogger logger)
+            {
+                _logger = logger;
+            }
+
             /// <summary>
             /// 实现接口
             /// </summary>
             /// <param name="configInfo"></param>
             public void ReceiveConfigInfo(string configInfo)
             {
-                Console.WriteLine("config updating " + configInfo,ConsoleColor.Red);
+                _logger.LogWarning("config updating " + configInfo);
             }
         }
     }

@@ -1,11 +1,21 @@
 using Nacos.AspNetCore.V2;
+using Nacos.Sample.Net6;
 using Nacos.V2.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+builder.Host.ConfigureAppConfiguration(builder =>
+{
+    // NuGet Package: nacos-sdk-csharp.Extensions.Configuration
+    // 用于扩展自带的Configuration
+    builder.AddNacosV2Configuration(configuration.GetSection("NacosConfig"));
+});
+
+
 #region 注册服务到容器 begin
 // nacos服务注册，发现配置
+builder.Services.Configure<UserInfo>(configuration.GetSection("UserInfo"));
 builder.Services.AddNacosAspNet(configuration, "NacosConfig");
 //用于添加临时服务
 builder.Services.AddNacosV2Naming(x =>
