@@ -11,14 +11,12 @@ namespace Nacos.Sample.Net6.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly INacosConfigService _nacosConfigService;
-        private readonly INacosNamingService _nacosNamingService;
-        private readonly CusConfigListen ConfigListen;
+        private readonly CusConfigListen _configListen;
         private readonly IOptions<UserInfo> _userInfo0;
         private readonly IOptionsSnapshot<UserInfo> _userInfo1;
         private readonly IOptionsMonitor<UserInfo> _userInfo2;
 
         public NacosController(INacosConfigService nacosConfigService,
-            INacosNamingService nacosNamingService,
             IConfiguration configuration,
             IOptions<UserInfo> userInfo0,
             IOptionsSnapshot<UserInfo> userInfo1,
@@ -26,12 +24,11 @@ namespace Nacos.Sample.Net6.Controllers
             ILogger<NacosController> logger)
         {
             _nacosConfigService = nacosConfigService;
-            _nacosNamingService = nacosNamingService;
             _configuration = configuration;
             _userInfo0 = userInfo0;
             _userInfo1 = userInfo1;
             _userInfo2 = userInfo2;
-            ConfigListen = new(logger);
+            _configListen = new(logger);
         }
         /// <summary>
         /// 获取配置
@@ -74,7 +71,7 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpGet]
         public async Task<string> AddListener(string dataId = "DataBase_ConnectionString")
         {
-            await _nacosConfigService.AddListener(dataId, "nacos_demo", ConfigListen).ConfigureAwait(false);
+            await _nacosConfigService.AddListener(dataId, "nacos_demo", _configListen).ConfigureAwait(false);
             return "ok";
         }
         /// <summary>
@@ -85,36 +82,9 @@ namespace Nacos.Sample.Net6.Controllers
         [HttpGet]
         public async Task<string> UnListener(string dataId = "DataBase_ConnectionString")
         {
-            await _nacosConfigService.RemoveListener(dataId, "nacos_demo", ConfigListen).ConfigureAwait(false);
+            await _nacosConfigService.RemoveListener(dataId, "nacos_demo", _configListen).ConfigureAwait(false);
 
             return "ok";
-        }
-        /// <summary>
-        /// 测试调用服务
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<string> TestCallService()
-        {
-            // 服务注册时nacos会自动获取本机ip，如果项目启动url为localhost，会出现计算机拒绝访问，修改lanuchSettings.json
-            // 启动地址改为本机ip即可
-
-            // 这里需要知道被调用方的服务名
-            // 获取服务实例
-            var instance = await _nacosNamingService.SelectOneHealthyInstance("NacosDemoApi", "nacos_demo").ConfigureAwait(false);
-            var host = $"{instance.Ip}:{instance.Port}";
-            var baseUrl = instance.Metadata.TryGetValue("secure", out _) ? $"https://{host}" : $"http://{host}";
-
-            if (string.IsNullOrWhiteSpace(baseUrl))
-            {
-                return "empty";
-            }
-
-            var url = $"{baseUrl}/api/nacos/getDBConnectionString";
-
-            using var client = new HttpClient();
-            var result = await client.GetAsync(url);
-            return await result.Content.ReadAsStringAsync();
         }
         /// <summary>
         /// 通过IConfiguration获取与nacos绑定的配置

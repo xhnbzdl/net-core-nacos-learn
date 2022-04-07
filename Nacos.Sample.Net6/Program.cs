@@ -14,20 +14,21 @@ builder.Host.ConfigureAppConfiguration(builder =>
 
 
 #region 注册服务到容器 begin
-// nacos服务注册，发现配置
-builder.Services.Configure<UserInfo>(configuration.GetSection("UserInfo"));
+// nacos服务管理
+// 程序启动时会自动注册当前自身服务 方式1:
 builder.Services.AddNacosAspNet(configuration, "NacosConfig");
-//用于添加临时服务
-builder.Services.AddNacosV2Naming(x =>
-{
-    var serverAddresses = configuration.GetSection("NacosConfig:ServerAddresses").Get<string []>().ToList();
-    x.ServerAddresses = serverAddresses;
-    x.EndPoint = configuration["NacosConfig:EndPoint"];
-    x.Namespace = configuration["NacosConfig:Namespace"];
-    x.NamingUseRpc = configuration.GetValue<bool>("NacosConfig:NamingUseRpc");
-});
+// 用于添加临时服务 方式2:
+//builder.Services.AddNacosV2Naming(x =>
+//{
+//    var serverAddresses = configuration.GetSection("NacosConfig:ServerAddresses").Get<string[]>().ToList();
+//    x.ServerAddresses = serverAddresses;
+//    x.EndPoint = configuration["NacosConfig:EndPoint"];
+//    x.Namespace = configuration["NacosConfig:Namespace"];
+//    x.NamingUseRpc = configuration.GetValue<bool>("NacosConfig:NamingUseRpc");
+//});
 // nacos配置中心，方式一：
 builder.Services.AddNacosV2Config(builder.Configuration, sectionName: "NacosConfig");
+builder.Services.Configure<UserInfo>(configuration.GetSection("UserInfo"));
 // nacos配置中心，方式二：
 //builder.Services.AddNacosV2Config(x =>
 //{
