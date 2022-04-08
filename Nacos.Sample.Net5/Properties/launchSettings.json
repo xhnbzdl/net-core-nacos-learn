@@ -1,10 +1,11 @@
 ﻿{
+  "profiles": {
     "Nacos.Sample.Net5": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5542",
+      "applicationUrl": "http://192.168.2.9:5545",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

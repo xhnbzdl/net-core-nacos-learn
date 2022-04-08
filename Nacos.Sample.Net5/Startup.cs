@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Nacos.V2.DependencyInjection;
 
 namespace Nacos.Sample.Net5
 {
@@ -29,6 +30,7 @@ namespace Nacos.Sample.Net5
 
             services.AddControllers();
             services.AddNacosAspNet(Configuration, "NacosConfig");
+            services.AddNacosV2Config(Configuration, sectionName: "NacosConfig");
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Nacos.Sample.Net5", Version = "v1" });
