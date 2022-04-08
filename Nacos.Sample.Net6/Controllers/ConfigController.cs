@@ -7,28 +7,29 @@ namespace Nacos.Sample.Net6.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class NacosController : ControllerBase
+    public class ConfigController : ControllerBase
     {
+        private static readonly CusConfigListen _configListen = new();
+
         private readonly IConfiguration _configuration;
         private readonly INacosConfigService _nacosConfigService;
-        private readonly CusConfigListen _configListen;
         private readonly IOptions<UserInfo> _userInfo0;
         private readonly IOptionsSnapshot<UserInfo> _userInfo1;
         private readonly IOptionsMonitor<UserInfo> _userInfo2;
 
-        public NacosController(INacosConfigService nacosConfigService,
+        public ConfigController(INacosConfigService nacosConfigService,
             IConfiguration configuration,
             IOptions<UserInfo> userInfo0,
             IOptionsSnapshot<UserInfo> userInfo1,
             IOptionsMonitor<UserInfo> userInfo2,
-            ILogger<NacosController> logger)
+            ILogger<ConfigController> logger)
         {
             _nacosConfigService = nacosConfigService;
             _configuration = configuration;
             _userInfo0 = userInfo0;
             _userInfo1 = userInfo1;
             _userInfo2 = userInfo2;
-            _configListen = new(logger);
+            _configListen.Logger = logger;
         }
         /// <summary>
         /// 获取配置
@@ -118,12 +119,7 @@ namespace Nacos.Sample.Net6.Controllers
         /// </summary>
         public class CusConfigListen : IListener
         {
-            private readonly ILogger _logger;
-
-            public CusConfigListen(ILogger logger)
-            {
-                _logger = logger;
-            }
+            public ILogger Logger { get; set; }
 
             /// <summary>
             /// 实现接口
@@ -131,7 +127,7 @@ namespace Nacos.Sample.Net6.Controllers
             /// <param name="configInfo"></param>
             public void ReceiveConfigInfo(string configInfo)
             {
-                _logger.LogWarning("config updating " + configInfo);
+                Logger.LogWarning("config updating " + configInfo);
             }
         }
     }
