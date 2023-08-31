@@ -37,9 +37,9 @@ namespace Nacos.Sample.Net6.Controllers
         /// <param name="dataId"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<string> GetSectionAsync(string dataId)
+        public async Task<string> GetSectionAsync(string dataId, string group = "nacos_demo")
         {
-            var res = await _nacosConfigService.GetConfig(dataId, "nacos_demo", 3000).ConfigureAwait(false);
+            var res = await _nacosConfigService.GetConfig(dataId, group, 3000).ConfigureAwait(false);
             return res;
         }
         /// <summary>
@@ -59,7 +59,7 @@ namespace Nacos.Sample.Net6.Controllers
         /// <param name="content"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<bool> SetConfig(string dataId,string group= "nacos_demo", string content="")
+        public async Task<bool> SetConfig(string dataId, string group= "nacos_demo", string content="")
         {
             var res = await _nacosConfigService.PublishConfig(dataId, group , content).ConfigureAwait(false);
             return res;
@@ -70,9 +70,9 @@ namespace Nacos.Sample.Net6.Controllers
         /// <param name="dataId"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<string> AddListener(string dataId = "DataBase_ConnectionString")
+        public async Task<string> AddListener(string dataId = "DataBase_ConnectionString", string group = "nacos_demo")
         {
-            await _nacosConfigService.AddListener(dataId, "nacos_demo", _configListen).ConfigureAwait(false);
+            await _nacosConfigService.AddListener(dataId, group, _configListen).ConfigureAwait(false);
             return "ok";
         }
         /// <summary>
@@ -81,9 +81,9 @@ namespace Nacos.Sample.Net6.Controllers
         /// <param name="dataId"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<string> UnListener(string dataId = "DataBase_ConnectionString")
+        public async Task<string> UnListener(string dataId = "DataBase_ConnectionString", string group = "nacos_demo")
         {
-            await _nacosConfigService.RemoveListener(dataId, "nacos_demo", _configListen).ConfigureAwait(false);
+            await _nacosConfigService.RemoveListener(dataId, group, _configListen).ConfigureAwait(false);
 
             return "ok";
         }
@@ -97,6 +97,17 @@ namespace Nacos.Sample.Net6.Controllers
             // 绑定了的配置，如果在GUI进行了修改，程序会同步得到修改后的配置
             return _configuration.GetSection("UserInfo").Get<UserInfo>();
         }
+
+        /// <summary>
+        /// 通过IConfiguration获取与nacos绑定的配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public object GetConfig(string dataId, string group = "nacos_demo")
+        {
+            return _configuration.GetSection(dataId).Value;
+        }
+
         /// <summary>
         /// 获取通过Services.Configure<UserInfo>的配置
         /// </summary>
